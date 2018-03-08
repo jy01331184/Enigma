@@ -1,0 +1,43 @@
+import org.gradle.api.internal.artifacts.mvnsettings.DefaultLocalMavenRepositoryLocator
+import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenFileLocations
+import org.gradle.api.internal.artifacts.mvnsettings.DefaultMavenSettingsProvider
+import org.gradle.api.internal.artifacts.mvnsettings.LocalMavenRepositoryLocator
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.squareup:javapoet:1.7.0'
+    compile 'org.javassist:javassist:3.20.0-GA'
+    compile 'com.google.auto.service:auto-service:1.0-rc2'
+    compile 'com.android.tools.build:gradle:1.5.0'
+    compile 'com.enigma:enigma:1.0.0@jar'
+    compile 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+}
+repositories {
+    mavenCentral()
+}
+
+group='com.enigma.plugin'
+version='1.0.0'
+def mavenLocalRepo = ''
+
+afterEvaluate{
+    DefaultMavenFileLocations locations = new DefaultMavenFileLocations()
+    DefaultMavenSettingsProvider provider = new DefaultMavenSettingsProvider(locations)
+    LocalMavenRepositoryLocator locator = new DefaultLocalMavenRepositoryLocator(provider)
+
+    mavenLocalRepo = locator.localMavenRepository.absolutePath
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository (url: uri(mavenLocalRepo))
+//                repository (url: 'http://localhost:8081/repository/maven-releases/'){
+//                    authentication(userName: "admin", password: "123")
+//                }
+            }
+        }
+    }
+}
